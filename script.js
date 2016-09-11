@@ -38,17 +38,6 @@ window.onload = function() {
 	context.strokeStyle = 'white';
 	context.stroke();
 
-
-	var game = new Game();
-	
-	window.setInterval(function(){
-  		game.start();
-	}, 50);
-
-
-
-
-
 }
 
 /*
@@ -76,12 +65,14 @@ var delay = function (elem, callback) {
 
 /*
  * On mouse over green area
- *
+ */
 delay(canvas, function() {
 	var game = new Game();
-	game.start();
+	window.setInterval(function(){
+  		game.start();
+	}, 50);
 });
-*/
+
 
 function Game() {
 
@@ -91,12 +82,22 @@ function Game() {
 		var imgData = context.getImageData(0, 0, canvas.width, canvas.height);
 		
 		// set the current image data to -1 y axe
-		context.putImageData(imgData, 0, 5);
+		context.putImageData(imgData, 0, 50);
 
 		// test to get 5 pixels of the head of the road
-		var imgHeadData = context.getImageData(0, 0, canvas.width, 5);
-		road = this.updateRoad(imgHeadData);
-		context.putImageData(road, 0, 0);
+		var imgHeadData = context.getImageData(0, 0, canvas.width, 50);
+
+		var rand = Math.floor((Math.random() * 2) + 1);
+
+		context.putImageData(imgHeadData, -5, 0);
+		if(imgHeadData.data[0] == 255 || rand == 2) context.putImageData(imgHeadData, 5, 0);
+		if(imgHeadData.data[imgHeadData.data.length-1] == 255 || rand == 1) context.putImageData(imgHeadData, -5, 0);
+
+		
+		
+		//road = this.goRight(imgHeadData);
+
+		//road = this.goRight();
 
 	}
 
@@ -104,21 +105,24 @@ function Game() {
 
 		var pixels = imgData.data;
 		var roadLength = pixels.length;
-		console.log(pixels, roadLength);
 
 		var r=0, g=1, b=2, a=3;
 		for(var p = 0; p < pixels.length; p+=4) {
 		  if (pixels[p+r] == 255 && pixels[p+g] == 255 && pixels[p+b] == 255) {
+
+			  // Remove the current pixels
 			  pixels[p+r] = 0;
 			  pixels[p+g] = 0;
 			  pixels[p+b] = 0;
+
+
 		  }
 		}
 
-		imgData.data = pixels;
-		return imgData;
+	}
 
-		
+	this.goRight = function(road) {
+		context.putImageData(road, 5, 10);
 	}
 
 }
