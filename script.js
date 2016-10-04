@@ -1,104 +1,152 @@
-var canvas = document.querySelector("canvas");
-var startTimer = false;
-
-// set canvas size
-canvas.height = document.body.clientHeight;
-canvas.width = document.body.clientWidth;
-
-// set game origins
-var xCenter = canvas.width / 2;
+var myCanvas, width, height, xCenter, leftXOrigin, rightXOrigin, context;
+var inRectangle, started = false;
 var radius = 100;
-
-var leftXOrigin = xCenter - radius;
-var rightXOrigin = xCenter + radius;
-
-var context = canvas.getContext('2d');
+var t = 0;
+const START_GAME = 10;
 
 
-window.onload = function() {
+function setup() {
 
-	context.beginPath();
-	context.lineJoin = "bevel";
+	// THE START SYSTEM IS LAGGING BECAUSE OF ALL THE noLoop() and loop() instances
+	//noLoop(); // Do not start the game by default
+
+	width = document.body.clientWidth;
+	height = document.body.clientHeight;
+
+	myCanvas = createCanvas(width, height);
+
+	context = myCanvas.canvas.getContext('2d');
+
+	// set game origins
+	xCenter = width / 2;
+	
+	leftXOrigin = xCenter - radius;
+	rightXOrigin = xCenter + radius;
+
+	var green = color(0, 100, 50);
+	fill(green);  
+	noStroke();
+	rect(leftXOrigin, height-(height/4), radius*2, height);
+
+	// Stroke color and thickness
+	stroke(255, 255, 255);
+	strokeWeight(5);
 
 	// left origin line
-	context.moveTo(leftXOrigin, canvas.height);
-	context.lineTo(leftXOrigin, 0);
+	line(leftXOrigin, height, leftXOrigin, 0);
 
 	// right origin line
-	context.moveTo(rightXOrigin, canvas.height);
-	context.lineTo(rightXOrigin, 0);
+	line(rightXOrigin, height, rightXOrigin, 0);
 
-	context.lineWidth = 5;
+	//var gui = new dat.GUI();
+	//gui.add(game, 'start1', -100, 100);
+
+
+	//var context = canvas.canvas.getContext('2d');
+
+	//context.beginPath();
+	//context.lineJoin = "bevel";
+	// left origin line
+	//context.moveTo(leftXOrigin, height);
+	//context.lineTo(leftXOrigin, 0);
+	
+	// right origin line
+	//context.moveTo(rightXOrigin, height);
+	//context.lineTo(rightXOrigin, 0);
+
+	//context.lineWidth = 5;
 
 	// Fill start rectangle
-	context.fillStyle = "rgb(0,100,50)";
-	context.fillRect(leftXOrigin, canvas.height-(canvas.height/4), radius*2, canvas.height);
+	//context.fillStyle = "rgb(0,100,50)";
+	//context.fillRect(leftXOrigin, height-(height/4), radius*2, height);
 
 	// set line color
-	context.strokeStyle = 'white';
-	context.stroke();
+	//context.strokeStyle = 'white';
+	//context.stroke();
 
-}
+	/*
+	 * On mouse over green area
+	 *
 
-/*
-window.onresize = function() {
-	canvas.height = document.body.clientHeight;
-	canvas.width = document.body.clientWidth;
-}
+	delay(p5Canvas.canvas, function() {
+		var game = new Game();
+		window.setInterval(function(){
+			game.start();
+			t += 1;
+		}, 50);
+	});
 */
 
-var delay = function (elem, callback) {
-    
-	var timeout = null;
-    elem.onmousemove = function(e) {
+}
 
-        // Set timeout to be a timer which will invoke callback after 1s
-		if( e.screenX > leftXOrigin && e.screenX < (leftXOrigin + radius*2) && e.screenY > canvas.height-(canvas.height/4) && !startTimer) {
-			startTimer = true;
-		    timeout = setTimeout(callback, 100);
-		} else if(startTimer) {
-			startTimer = false;
-			clearTimeout(timeout);
-		} 
-    };
-};
+function mouseMoved() {
 
-/*
- * On mouse over green area
- */
-delay(canvas, function() {
-	var game = new Game();
-	window.setInterval(function(){
-  		game.start();
-	}, 50);
-});
+	// if mouse on hover rectangle
+	if(winMouseX > leftXOrigin 
+	&& winMouseX < (leftXOrigin + radius*2) 
+	&& winMouseY > height-(height/4) 
+	&& !started) {
+		loop();
+		inRectangle = true;
+	} else if(!started) {
+		inRectangle = false;
+		noLoop();
+		t= 0;
+	}
+}
 
 
-function Game() {
+function draw() {
 
-	this.start = function() {
+	// Start the game 
+	//if(inRectangle && !started && t >= START_GAME) started = true;
+    started=true;
+
+	if(started) {
+		game.update();
+	}
+
+	t += 1;
+	
+	
+//	var game = new Game();
+//	game.start();
+}
+
+
+
+var Game = function() {
+
+	this.start1 = -1;
+	this.stop1 = 2;
+	this.start2 = 0;
+	this.stop2 = 0;
+
+	this.speed = 70;
+
+	this.update = function() {
 
 		// get the current image data
-		var imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+		var imgData = context.getImageData(0, 0, width*2, height*2);
 		
 		// set the current image data to -1 y axe
-		context.putImageData(imgData, 0, 50);
+		// Make the game "going forward"
+		context.putImageData(imgData, 0, this.speed);
 
 		// test to get 5 pixels of the head of the road
-		var imgHeadData = context.getImageData(0, 0, canvas.width, 50);
+		var imgHeadData = context.getImageData(0, 0, width*2, this.speed);
 
+		/*
 		var rand = Math.floor((Math.random() * 2) + 1);
-
-		context.putImageData(imgHeadData, -5, 0);
 		if(imgHeadData.data[0] == 255 || rand == 2) context.putImageData(imgHeadData, 5, 0);
 		if(imgHeadData.data[imgHeadData.data.length-1] == 255 || rand == 1) context.putImageData(imgHeadData, -5, 0);
+		*/
 
+		// Try to add t var in this
+		var x = map(noise(t), this.start1, this.stop1, this.start2, this.stop2);
+		context.putImageData(imgHeadData, x, 0);
 		
-		
-		//road = this.goRight(imgHeadData);
-
-		//road = this.goRight();
-
 	}
 
 	this.updateRoad = function(imgData) {
@@ -127,5 +175,18 @@ function Game() {
 
 }
 
+var game = new Game();
+window.onload = function() {
+	var gui = new dat.GUI();
+	gui.add(game, 'start1', -10, 10);
+	gui.add(game, 'stop1', -10, 10);
+	gui.add(game, 'start2', -100, 100);
+	gui.add(game, 'stop2', -100, 100);
+	gui.add(game, 'speed', 1, 100);
+
+
+
+
+}
 
 

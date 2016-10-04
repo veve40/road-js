@@ -1,0 +1,22 @@
+{
+  "main": "script.js",
+  "dependencies": {
+    "noisejs": "^2.1.0",
+    "webpack": "^1.13.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/veve40/road-js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/veve40/road-js/issues"
+  },
+  "homepage": "https://github.com/veve40/road-js#readme",
+  "description": ""
+}
