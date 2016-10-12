@@ -1,8 +1,8 @@
 {
   "main": "script.js",
   "dependencies": {
-    "noisejs": "^2.1.0",
-    "webpack": "^1.13.2"
+    "express": "^4.10.2",
+    "socket.io": "^1.5.0"
   },
   "devDependencies": {},
   "scripts": {

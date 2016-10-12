@@ -3,7 +3,9 @@ var inRectangle, started = false;
 var radius = 100;
 var t = 0;
 const START_GAME = 10;
+var socket = io();
 
+var xAccel = 0;
 
 function setup() {
 
@@ -108,15 +110,13 @@ function draw() {
 
 	t += 1;
 	
-	
-//	var game = new Game();
-//	game.start();
 }
 
-
+var angle = 0.0;
 
 var Game = function() {
 
+	this.value = 0;
 	this.start1 = -1;
 	this.stop1 = 2;
 	this.start2 = 0;
@@ -125,6 +125,8 @@ var Game = function() {
 	this.speed = 70;
 
 	this.update = function() {
+
+
 
 		// get the current image data
 
@@ -143,9 +145,18 @@ var Game = function() {
 		if(imgHeadData.data[imgHeadData.data.length-1] == 255 || rand == 1) context.putImageData(imgHeadData, -5, 0);
 		*/
 
+	    
 		// Try to add t var in this
-		var x = map(noise(t), this.start1, this.stop1, this.start2, this.stop2);
+		var noisevar = noise(t);
+		var x = map(this.value, this.start1, this.stop1, this.start2, xAccel);
+		
+		/*var sinval = sin(angle);
+		var x = map(sinval, this.start1, this.stop1, this.start2, this.stop2);
+		console.log(x);
+		angle += 0.1;
+		*/
 		context.putImageData(imgHeadData, x, 0);
+
 		
 	}
 
@@ -176,17 +187,26 @@ var Game = function() {
 }
 
 var game = new Game();
+/*
 window.onload = function() {
 	var gui = new dat.GUI();
+	gui.add(game, 'value', -100, 100);
 	gui.add(game, 'start1', -10, 10);
 	gui.add(game, 'stop1', -10, 10);
 	gui.add(game, 'start2', -100, 100);
 	gui.add(game, 'stop2', -100, 100);
 	gui.add(game, 'speed', 1, 100);
-
-
-
-
 }
+*/
+
+// send data over the socket for acceleration
+window.ondevicemotion = function(e){
+	socket.emit('acceleration', e.accelerationIncludingGravity.x);
+}
+
+// Receive acceleration data
+socket.on('accelx', function(data) {
+	if(data) xAccel = Number((data).toFixed(2))*10;
+});
 
 
