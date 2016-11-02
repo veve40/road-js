@@ -1,9 +1,9 @@
 var myCanvas, width, height, xCenter, leftXOrigin, rightXOrigin, context;
 var inRectangle, started = false;
 var radius = 100;
-var t = 0;
+
 const START_GAME = 10;
-var socket = io();
+//var socket = io();
 
 var xAccel = 0;
 
@@ -19,8 +19,13 @@ function setup() {
 
 	context = myCanvas.canvas.getContext('2d');
 
+	//frameRate(10);
+
+
 	// set game origins
-	xCenter = width / 2;
+	/*
+	 * Testing without anything
+	 * xCenter = width / 2;
 	
 	leftXOrigin = xCenter - radius;
 	rightXOrigin = xCenter + radius;
@@ -39,47 +44,10 @@ function setup() {
 
 	// right origin line
 	line(rightXOrigin, height, rightXOrigin, 0);
-
-	//var gui = new dat.GUI();
-	//gui.add(game, 'start1', -100, 100);
-
-
-	//var context = canvas.canvas.getContext('2d');
-
-	//context.beginPath();
-	//context.lineJoin = "bevel";
-	// left origin line
-	//context.moveTo(leftXOrigin, height);
-	//context.lineTo(leftXOrigin, 0);
-	
-	// right origin line
-	//context.moveTo(rightXOrigin, height);
-	//context.lineTo(rightXOrigin, 0);
-
-	//context.lineWidth = 5;
-
-	// Fill start rectangle
-	//context.fillStyle = "rgb(0,100,50)";
-	//context.fillRect(leftXOrigin, height-(height/4), radius*2, height);
-
-	// set line color
-	//context.strokeStyle = 'white';
-	//context.stroke();
-
-	/*
-	 * On mouse over green area
-	 *
-
-	delay(p5Canvas.canvas, function() {
-		var game = new Game();
-		window.setInterval(function(){
-			game.start();
-			t += 1;
-		}, 50);
-	});
-*/
+	*/
 
 }
+
 
 function mouseMoved() {
 
@@ -107,106 +75,76 @@ function draw() {
 	if(started) {
 		game.update();
 	}
-
-	t += 1;
+	
+	//noLoop();
 	
 }
 
-var angle = 0.0;
 
+
+// specific point on perlin noise
+var inc = 0;
 var Game = function() {
 
-	this.value = 0;
-	this.start1 = -1;
-	this.stop1 = 2;
-	this.start2 = 0;
-	this.stop2 = 0;
-
-	this.speed = 70;
+	this.speed = 0.02;
+	this.range = 0.002;
+	this.strength = 500;
+	this.size = 200;
 
 	this.update = function() {
 
+		background(0);
+		stroke(255);
+		noFill();
 
+		var xoffset = inc;
 
-		// get the current image data
+		beginShape();
+		for( var y = 0 ; y < height ; y++) {
+			
+			var x = noise(xoffset) * this.strength;
 
-		var imgData = context.getImageData(0, 0, width*2, height*2);
-		
-		// set the current image data to -1 y axe
-		// Make the game "going forward"
-		context.putImageData(imgData, 0, this.speed);
+			// Create Road
+			// Create points and link them
+			vertex(x, y);
+			vertex(x+this.size, y);
 
-		// test to get 5 pixels of the head of the road
-		var imgHeadData = context.getImageData(0, 0, width*2, this.speed);
-
-		/*
-		var rand = Math.floor((Math.random() * 2) + 1);
-		if(imgHeadData.data[0] == 255 || rand == 2) context.putImageData(imgHeadData, 5, 0);
-		if(imgHeadData.data[imgHeadData.data.length-1] == 255 || rand == 1) context.putImageData(imgHeadData, -5, 0);
-		*/
-
-	    
-		// Try to add t var in this
-		var noisevar = noise(t);
-		var x = map(this.value, this.start1, this.stop1, this.start2, xAccel);
-		
-		/*var sinval = sin(angle);
-		var x = map(sinval, this.start1, this.stop1, this.start2, this.stop2);
-		console.log(x);
-		angle += 0.1;
-		*/
-		context.putImageData(imgHeadData, x, 0);
-
-		
-	}
-
-	this.updateRoad = function(imgData) {
-
-		var pixels = imgData.data;
-		var roadLength = pixels.length;
-
-		var r=0, g=1, b=2, a=3;
-		for(var p = 0; p < pixels.length; p+=4) {
-		  if (pixels[p+r] == 255 && pixels[p+g] == 255 && pixels[p+b] == 255) {
-
-			  // Remove the current pixels
-			  pixels[p+r] = 0;
-			  pixels[p+g] = 0;
-			  pixels[p+b] = 0;
-
-
-		  }
+			// increment for perlin noise dynamic effect
+			xoffset += this.range;
 		}
+		endShape();
 
+		// Create movement
+		inc += this.speed;
+		
 	}
 
-	this.goRight = function(road) {
-		context.putImageData(road, 5, 10);
-	}
 
 }
 
 var game = new Game();
-/*
+
 window.onload = function() {
 	var gui = new dat.GUI();
-	gui.add(game, 'value', -100, 100);
-	gui.add(game, 'start1', -10, 10);
-	gui.add(game, 'stop1', -10, 10);
-	gui.add(game, 'start2', -100, 100);
-	gui.add(game, 'stop2', -100, 100);
-	gui.add(game, 'speed', 1, 100);
+	
+	gui.add(game, 'range', 0, 0.005);
+	gui.add(game, 'strength', 0, 2000);
+	gui.add(game, 'speed', 0, 0.1);
+	gui.add(game, 'size', 0, 500);
+
+
 }
-*/
+
 
 // send data over the socket for acceleration
 window.ondevicemotion = function(e){
-	socket.emit('acceleration', e.accelerationIncludingGravity.x);
+	//socket.emit('acceleration', e.accelerationIncludingGravity.x);
 }
 
 // Receive acceleration data
+/*
 socket.on('accelx', function(data) {
 	if(data) xAccel = Number((data).toFixed(2))*10;
 });
-
+*/
 
