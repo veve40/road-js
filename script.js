@@ -91,6 +91,9 @@ var Game = function() {
 	this.strength = 500;
 	this.size = 200;
 
+	// Try 2 player variable
+	// this.twoPlayerX = 100; 
+
 	this.update = function() {
 
 		background(0);
@@ -100,17 +103,24 @@ var Game = function() {
 		var xoffset = inc;
 
 		beginShape();
-		for( var y = 0 ; y < height ; y++) {
+		for(var y = 0 ; y < height ; y++) {
 			
+			// 1 player
 			var x = noise(xoffset) * this.strength;
+			
+			// Start 2 player var
+			// var x = sin(xoffset)/3 * this.twoPlayerX + (width/2);
+
 
 			// Create Road
 			// Create points and link them
 			vertex(x, y);
-			vertex(x+this.size, y);
+			vertex(x + this.size, y);
 
 			// increment for perlin noise dynamic effect
 			xoffset += this.range;
+
+
 		}
 		endShape();
 
@@ -131,6 +141,8 @@ window.onload = function() {
 	gui.add(game, 'strength', 0, 2000);
 	gui.add(game, 'speed', 0, 0.1);
 	gui.add(game, 'size', 0, 500);
+
+	// gui.add(game, 'twoPlayerX', -1000, 1000);
 
 
 }
